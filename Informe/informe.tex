@@ -1,0 +1,96 @@
+\documentclass[12pt]{article}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{geometry}
+\usepackage{hyperref}
+\geometry{margin=1in}
+
+\title{Asignación de Frecuencias con Costos Variables en ConectaMax Telecom}
+
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Se presenta la formalización y clasificación del problema de asignación de frecuencias en ConectaMax Telecom. El problema se modela como una combinación de Asignación de Frecuencias (Frequency Assignment Problem, FAP) y Coloración de Grafos Ponderada, incorporando costos heterogéneos por torre y frecuencia. Se discuten su complejidad NP-difícil, las variantes relevantes y las líneas de solución recomendadas para instancias reales.
+\end{abstract}
+
+\section{Introducción}
+La operación de redes celulares requiere asignar frecuencias a torres cumpliendo restricciones de interferencia y minimizando el costo operativo. En ConectaMax Telecom, cada asignación frecuencia--torre posee un costo específico derivado de equipamiento, energía y regulaciones locales, lo que convierte el FAP clásico en una coloración de grafos con costos.
+
+\section{Definición formal del problema}
+Sea $G = (V, E)$ el grafo de interferencia, donde $V$ representa las torres y $E$ conecta pares que no pueden compartir frecuencia. Sea $F$ el conjunto de frecuencias disponibles y $c_{v,f}$ el costo de asignar la frecuencia $f$ a la torre $v$. Se usa la variable binaria $x_{v,f}$ que vale 1 si $v$ opera en $f$.
+
+\begin{align}
+\min_{x} \quad & \sum_{v \in V} \sum_{f \in F} c_{v,f}\, x_{v,f} \\
+\text{s.a.} \quad & \sum_{f \in F} x_{v,f} = 1 && \forall v \in V \\
+& x_{u,f} + x_{v,f} \le 1 && \forall (u,v) \in E,\ \forall f \in F \\
+& x_{v,f} \in \{0,1\} && \forall v \in V,\ \forall f \in F.
+\end{align}
+
+El objetivo minimiza el costo total, garantizando una coloración propia (no hay interferencia) y asignando una frecuencia por torre. Extensiones pueden incluir múltiples canales por torre o separaciones mínimas entre canales adyacentes.
+
+\section{Clasificación del problema}
+\subsection{Asignación de frecuencias con costos variables}
+El modelo extiende el FAP clásico incorporando una función de costo heterogénea $c_{v,f}$ condicionada por equipamiento, consumo y regulación local. Este enfoque aparece como \emph{minimum cost frequency assignment}.
+
+\subsection{Coloración de grafos ponderada}
+Equivalente a colorear el grafo de interferencia con colores $F$, minimizando la suma de costos por nodo. Se vincula con \emph{minimum cost graph coloring} y variantes de grafos coloreados con funciones de costo.
+
+\subsection{Complejidad computacional}
+El problema es NP-completo: no se conoce algoritmo polinómico que encuentre la solución óptima en instancias grandes, y el espacio de búsqueda crece exponencialmente con $|V|$ y $|F|$. Para redes con cientos o miles de torres se requieren métodos aproximados o heurísticos.
+
+\section{Características específicas en ConectaMax}
+\begin{itemize}
+  \item Costos asimétricos por torre y frecuencia: $c_{v,f}$ depende de hardware, energía y regulación.
+  \item Múltiples componentes de costo: consumo, licencia, mantenimiento y riesgos de interferencia.
+  \item Restricciones de interferencia estrictas: torres vecinas no pueden compartir frecuencia; pueden añadirse restricciones de separación entre canales adyacentes.
+\end{itemize}
+
+\section{Métodos de solución}
+\subsection{Métodos exactos}
+\begin{itemize}
+  \item Algoritmos de \emph{branch-and-cut} especializados para FAP, efectivos en instancias pequeñas y medianas.
+  \item Esquemas de \emph{branch-and-price} que usan diagramas de decisiones binarios para resolver problemas de tarificación.
+\end{itemize}
+
+\subsection{Heurísticas avanzadas}
+\begin{itemize}
+  \item \emph{Simulated annealing} con movimientos de recoloración local.
+  \item \emph{Tabu search} que explora recoloraciones con memoria de prohibiciones.
+  \item Algoritmos genéticos e híbridos evolutivos orientados a grafos ponderados.
+  \item Estrategias \emph{greedy} para construcción inicial, seguidas de mejora local (descentes o shaking estilo VNS).
+\end{itemize}
+
+\subsection{Enfoque recomendado para ConectaMax}
+\begin{enumerate}
+  \item Modelar como ILP (formulación anterior) para generar cotas inferiores y validar instancias pequeñas.
+  \item Construir soluciones iniciales con heurísticas \emph{greedy} basadas en costo marginal $c_{v,f}$ y grado de interferencia.
+  \item Mejorar con tabu search o simulated annealing; comparar contra las cotas del ILP en instancias reducidas.
+  \item Escalar mediante descomposición del grafo (clustering geográfico) y solución por regiones con ajustes en fronteras.
+\end{enumerate}
+
+\section{Bibliografía}
+\begin{thebibliography}{9}
+
+\bibitem{Hale1980} W. K. Hale, ``Frequency Assignment: Theory and Applications,'' \emph{IEEE Proceedings}, 1980.
+
+\bibitem{Borndorfer1998} R. Borndörfer, A. Eisenblätter, M. Grötschel, A. Martin, ``Frequency Assignment in Cellular Phone Networks,'' 1998.
+
+\bibitem{Aardal1996} K. I. Aardal et al., ``A Branch-and-Cut Algorithm for the Frequency Assignment Problem,'' 1996.
+
+\bibitem{Morrison} D. R. Morrison et al., ``Solving the Pricing Problem in a Branch-and-Price Algorithm with Binary Decision Diagrams,'' Optimization Online preprint.
+
+\bibitem{Goddard2020} W. Goddard et al., ``Coloring of Graphs with Cost Functions Whose Marginal Costs Decrease,'' 2020.
+
+\bibitem{Duque1993} M. Duque-Antón, D. Kunz, B. Rüber, ``Channel Assignment for Cellular Radio Using Simulated Annealing,'' 1993.
+
+\bibitem{Hao1998} J.-K. Hao, R. Dorne, P. Galinier, ``Tabu Search for Frequency Assignment in Mobile Radio Networks,'' 1998.
+
+\bibitem{Dorne1995} R. Dorne, J.-K. Hao, ``An Evolutionary Approach for Frequency Assignment in Cellular Radio Networks,'' 1995.
+
+\end{thebibliography}
+
+\end{document}
